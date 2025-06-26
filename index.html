@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1976d2">
+<link rel="manifest" href="data:application/json,{%22name%22:%22クロス管理%22,%22short_name%22:%22クロス管理%22,%22start_url%22:%22/%22,%22display%22:%22standalone%22,%22theme_color%22:%22%231976d2%22,%22background_color%22:%22%23ffffff%22}">
+<title>クロス糊付け管理</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, sans-serif;
+  background: #f5f5f5;
+  color: #333;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 10px;
+}
+
+.header {
+  background: #1976d2;
+  color: #fff;
+  padding: 15px;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.trash-btn {
+  background: #f44336;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 14px;
+  margin: 0;
+}
+
+.trash-btn:hover {
+  background: #d32f2f;
+}
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+button {
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin: 5px;
+}
+
+button:hover {
+  background: #1565c0;
+}
+
+.btn-secondary {
+  background: #757575;
+}
+
+.btn-secondary:hover {
+  background: #616161;
+}
+
+.btn-danger {
+  background: #d32f2f;
+}
+
+.btn-danger:hover {
+  background: #c62828;
+}
+
+.btn-success {
+  background: #388e3c;
+}
+
+.btn-success:hover {
+  background: #2e7d32;
+}
+
+.btn-small {
+  padding: 5px 10px;
+  font-size: 14px;
+  margin: 2px;
+}
+
+.btn-tiny {
+  padding: 3px 8px;
+  font-size: 12px;
+  margin: 2px;
+}
+
+.tabs {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 20px;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  background: #e0e0e0;
+  cursor: pointer;
+  border-radius: 4px 4px 0 0;
+}
+
+.tab.active {
+  background: #1976d2;
+  color: #fff;
+}
+
+.hidden {
+  display: none;
+}
+
+.room-candidates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 10px 0;
+}
+
+.candidate-btn {
+  background: #66bb6a;
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: 15px;
+}
+
+.candidate-btn:hover {
+  background: #4caf50;
+}
+
+.room-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.room-item {
+  background: #f5f5f5;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.room-item:hover {
+  background: #e0e0e0;
+}
+
+.dimension-group {
+  margin: 10px 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.group-header {
+  font-weight: bold;
+  background: #f5f5f5;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.collapse-btn {
+  margin-right: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sub-header {
+  font-weight: bold;
+  color: #666;
+  margin: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.dimension-item {
+  background: #f5f5f5;
+  padding: 10px;
+  margin: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.dimension-item:hover {
+  background: #e0e0e0;
+}
+
+.dimension-item.completed {
+  background: #c8e6c9;
+  text-decoration: line-through;
+}
+
+.dimension-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.memo {
+  color: #666;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quantity-control button {
+  margin: 0;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.collapsed {
+  display: none;
+}
+
+.change-indicator {
+  color: #d32f2f;
+  font-weight: bold;
+}
+
+.change-indicator.positive {
+  color: #388e3c;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+}
+
+.product-input-group {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.product-input-group input {
+  flex: 1;
+}
+
+.add-log {
+  background: #4caf50;
+  color: #fff;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
+  text-align: center;
+  display: none;
+}
+
+.add-log.show {
+  display: block;
+}
+
+.trash-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.trash-item {
+  background: #f5f5f5;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 4px;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.trash-item-info {
+  flex: 1;
+}
+
+.restore-btn {
+  background: #4caf50;
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.restore-btn:hover {
+  background: #45a049;
+}
+
+.trash-empty {
+  text-align: center;
+  color: #999;
+  padding: 20px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+<h1>クロス糊付け管理アプリ</h1>
+<button class="trash-btn btn-small" id="trash-btn">🗑️</button>
+</div>
+
+<div class="tabs">
+<div class="tab active" data-tab="rooms">部屋管理</div>
+<div class="tab" data-tab="input">寸法入力</div>
+<div class="tab" data-tab="view">一覧表示</div>
+</div>
+
+<div id="rooms-tab" class="tab-content">
+<div class="card">
+<h2>部屋の登録</h2>
+<div class="room-candidates">
+<button class="candidate-btn btn-tiny" data-room="洋間1">洋間1</button>
+<button class="candidate-btn btn-tiny" data-room="洋間2">洋間2</button>
+<button class="candidate-btn btn-tiny" data-room="洋間3">洋間3</button>
+<button class="candidate-btn btn-tiny" data-room="LDK">LDK</button>
+<button class="candidate-btn btn-tiny" data-room="洗面・トイレ">洗面・トイレ</button>
+<button class="candidate-btn btn-tiny" data-room="玄関・廊下">玄関・廊下</button>
+<button class="candidate-btn btn-tiny" data-room="CL">CL</button>
+</div>
+<input type="text" id="room-name" placeholder="その他の部屋名">
+<button id="add-room-btn">部屋を追加</button>
+<div class="room-list" id="room-list"></div>
+</div>
+</div>
+
+<div id="input-tab" class="tab-content hidden">
+<div class="card">
+<h2>寸法入力</h2>
+<select id="room-select">
+<option value="">部屋を選択</option>
+</select>
+<div class="product-input-group">
+<input type="text" id="product-code" placeholder="品番" list="product-history">
+<datalist id="product-history"></datalist>
+</div>
+<select id="location-type">
+<option value="天井">天井</option>
+<option value="梁">梁</option>
+<option value="壁">壁</option>
+</select>
+<input type="number" id="dimension" placeholder="寸法（cm）">
+<div class="quantity-control">
+<span>本数：</span>
+<button class="btn-small" id="qty-minus">−</button>
+<input type="number" id="quantity" value="1" min="1" style="width:60px;text-align:center">
+<button class="btn-small" id="qty-plus">＋</button>
+</div>
+<textarea id="memo" placeholder="メモ（任意）" rows="2"></textarea>
+<button id="add-dimension-btn">追加</button>
+<div class="add-log" id="add-log"></div>
+</div>
+</div>
+
+<div id="view-tab" class="tab-content hidden">
+<div class="card">
+<h2>寸法一覧</h2>
+<select id="view-room-select">
+<option value="">全ての部屋</option>
+</select>
+<div id="dimensions-view"></div>
+</div>
+</div>
+</div>
+
+<div id="memo-modal" class="modal hidden">
+<div class="modal-content" onclick="event.stopPropagation()">
+<h3>メモを編集</h3>
+<textarea id="modal-memo" rows="4" style="width:100%"></textarea>
+<button id="save-memo-btn">保存</button>
+<button class="btn-secondary" id="cancel-memo-btn">キャンセル</button>
+</div>
+</div>
+
+<div id="delete-confirm-modal" class="modal hidden">
+<div class="modal-content">
+<h3>削除確認</h3>
+<p id="delete-confirm-message"></p>
+<button id="delete-confirm-btn" class="btn-danger">削除</button>
+<button id="delete-cancel-btn" class="btn-secondary">キャンセル</button>
+</div>
+</div>
+
+<div id="trash-modal" class="modal hidden">
+<div class="modal-content">
+<h3>🗑️ ゴミ箱</h3>
+<div class="trash-list" id="trash-list"></div>
+<button class="btn-secondary" id="close-trash-btn">閉じる</button>
+</div>
+</div>
+
+<script>
+let data = JSON.parse(localStorage.getItem('wallpaperData')) || {rooms:[],dimensions:[],products:[],trash:[]};
+if(typeof data.rooms === 'string') {
+  data.rooms = data.rooms.split(',');
+}
+if(!Array.isArray(data.rooms)) {
+  data.rooms = [];
+}
+if(!Array.isArray(data.dimensions)) {
+  data.dimensions = [];
+}
+if(!Array.isArray(data.products)) {
+  data.products = [];
+}
+if(!Array.isArray(data.trash)) {
+  data.trash = [];
+}
+
+let collapsedRooms = new Set();
+let currentEditId = null;
+let currentDeleteItem = null;
+
+const save = () => localStorage.setItem('wallpaperData', JSON.stringify(data));
+
+// タブ切り替え
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const tabName = tab.getAttribute('data-tab');
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+    tab.classList.add('active');
+    if(tabName === 'input') updateRoomSelect();
+    if(tabName === 'view') updateViewRoomSelect();
+  });
+});
+
+// 部屋候補ボタン
+document.querySelectorAll('.candidate-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const roomName = btn.getAttribute('data-room');
+    addRoomQuick(roomName);
+  });
+});
+
+// 部屋追加
+const addRoomQuick = (name) => {
+  if(data.rooms.includes(name)) return alert('既に登録されています');
+  data.rooms.push(name);
+  save();
+  updateRoomList();
+};
+
+document.getElementById('add-room-btn').addEventListener('click', () => {
+  const name = document.getElementById('room-name').value.trim();
+  if(!name) return alert('部屋名を入力してください');
+  addRoomQuick(name);
+  document.getElementById('room-name').value = '';
+});
+
+// 部屋リスト更新
+const updateRoomList = () => {
+  const list = document.getElementById('room-list');
+  list.innerHTML = '';
+  
+  for(let i = 0; i < data.rooms.length; i++) {
+    const room = data.rooms[i];
+    const div = document.createElement('div');
+    div.className = 'room-item';
+    
+    const span = document.createElement('span');
+    span.textContent = room;
+    
+    const button = document.createElement('button');
+    button.className = 'btn-small btn-danger';
+    button.textContent = '削除';
+    button.dataset.roomName = room;
+    
+    div.appendChild(span);
+    div.appendChild(button);
+    list.appendChild(div);
+  }
+  
+  const deleteButtons = list.querySelectorAll('.btn-danger');
+  deleteButtons.forEach(btn => {
+    btn.onclick = function() {
+      const targetRoom = this.dataset.roomName;
+      data.trash.push({
+        type: '部屋',
+        name: targetRoom,
+        deletedAt: new Date().toLocaleString()
+      });
+      data.rooms = data.rooms.filter(r => r !== targetRoom);
+      data.dimensions = data.dimensions.filter(d => d.room !== targetRoom);
+      save();
+      updateRoomList();
+    };
+  });
+};
+
+// 部屋セレクト更新
+const updateRoomSelect = () => {
+  const select = document.getElementById('room-select');
+  select.innerHTML = '<option value="">部屋を選択</option>' + 
+    data.rooms.map(r => `<option value="${r}">${r}</option>`).join('');
+};
+
+const updateViewRoomSelect = () => {
+  const select = document.getElementById('view-room-select');
+  select.innerHTML = '<option value="">全ての部屋</option>' + 
+    data.rooms.map(r => `<option value="${r}">${r}</option>`).join('');
+  updateView();
+};
+
+// 品番履歴更新
+const updateProductHistory = () => {
+  const datalist = document.getElementById('product-history');
+  datalist.innerHTML = [...new Set(data.products)].map(p => `<option value="${p}">`).join('');
+};
+
+// 数量変更
+document.getElementById('qty-minus').addEventListener('click', () => {
+  const input = document.getElementById('quantity');
+  input.value = Math.max(1, parseInt(input.value) - 1);
+});
+
+document.getElementById('qty-plus').addEventListener('click', () => {
+  const input = document.getElementById('quantity');
+  input.value = parseInt(input.value) + 1;
+});
+
+// 追加ログ表示
+const showAddLog = (message) => {
+  const log = document.getElementById('add-log');
+  log.textContent = message;
+  log.classList.add('show');
+  setTimeout(() => {
+    log.classList.remove('show');
+  }, 3000);
+};
+
+// 寸法追加
+document.getElementById('add-dimension-btn').addEventListener('click', () => {
+  const room = document.getElementById('room-select').value;
+  const product = document.getElementById('product-code').value.trim();
+  const location = document.getElementById('location-type').value;
+  const dimension = document.getElementById('dimension').value;
+  const quantity = document.getElementById('quantity').value;
+  const memo = document.getElementById('memo').value.trim();
+  
+  if(!room || !product || !dimension) return alert('必須項目を入力してください');
+  
+  const id = Date.now();
+  data.dimensions.push({
+    id, room, product, location, 
+    dimension: parseInt(dimension), 
+    quantity: parseInt(quantity), 
+    originalQuantity: parseInt(quantity),
+    change: 0,
+    completed: false,
+    memo
+  });
+  if(!data.products.includes(product)) data.products.push(product);
+  save();
+  
+  document.getElementById('dimension').value = '';
+  document.getElementById('memo').value = '';
+  document.getElementById('quantity').value = '1';
+  updateProductHistory();
+  
+  showAddLog(`✓ 追加しました: ${room} - ${product} - ${location} - ${dimension}cm × ${quantity}本`);
+});
+
+// 一覧表示更新
+const updateView = () => {
+  const selectedRoom = document.getElementById('view-room-select').value;
+  const filtered = selectedRoom ? data.dimensions.filter(d => d.room === selectedRoom) : data.dimensions;
+  
+  const grouped = {};
+  filtered.forEach(d => {
+    if(!grouped[d.room]) grouped[d.room] = {};
+    if(!grouped[d.room][d.location]) grouped[d.room][d.location] = {};
+    if(!grouped[d.room][d.location][d.product]) grouped[d.room][d.location][d.product] = [];
+    grouped[d.room][d.location][d.product].push(d);
+  });
+  
+  const container = document.getElementById('dimensions-view');
+  container.innerHTML = '';
+  
+  Object.entries(grouped).forEach(([room, locations]) => {
+    const groupDiv = document.createElement('div');
+    groupDiv.className = 'dimension-group';
+    
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'group-header';
+    headerDiv.innerHTML = `<span class="collapse-btn">${collapsedRooms.has(room) ? '▶' : '▼'}</span><span>📍 ${room}</span>`;
+    headerDiv.addEventListener('click', () => {
+      if(collapsedRooms.has(room)) {
+        collapsedRooms.delete(room);
+      } else {
+        collapsedRooms.add(room);
+      }
+      updateView();
+    });
+    groupDiv.appendChild(headerDiv);
+    
+    const contentDiv = document.createElement('div');
+    contentDiv.className = collapsedRooms.has(room) ? 'collapsed' : '';
+    
+    Object.entries(locations).forEach(([location, products]) => {
+      const locDiv = document.createElement('div');
+      locDiv.innerHTML = `<div class="sub-header">▸ ${location}</div>`;
+      
+      Object.entries(products).forEach(([product, items]) => {
+        const prodDiv = document.createElement('div');
+        prodDiv.style.marginLeft = '20px';
+        prodDiv.style.marginBottom = '10px';
+        prodDiv.innerHTML = `<strong>品番: ${product}</strong>`;
+        
+        items.forEach(item => {
+          const itemDiv = document.createElement('div');
+          itemDiv.className = `dimension-item ${item.completed ? 'completed' : ''}`;
+          
+          const detailDiv = document.createElement('div');
+          detailDiv.className = 'dimension-detail';
+          
+          const leftDiv = document.createElement('div');
+          leftDiv.style.display = 'flex';
+          leftDiv.style.alignItems = 'center';
+          leftDiv.style.gap = '10px';
+          
+          const completeBtn = document.createElement('button');
+          completeBtn.className = `btn-small ${item.completed ? 'btn-success' : ''}`;
+          completeBtn.textContent = item.completed ? '✓' : '○';
+          completeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            item.completed = !item.completed;
+            save();
+            updateView();
+          });
+          
+          const originalQty = item.originalQuantity || item.quantity || 1;
+          const currentQty = item.quantity || 1;
+          const change = item.change || 0;
+          const changeText = change !== 0 ? 
+            `<span class="change-indicator ${change > 0 ? 'positive' : ''}">(${change > 0 ? '+' : ''}${change})</span>` : '';
+          const totalText = change !== 0 ? `<span>(＝${currentQty}本)</span>` : '';
+          
+          const infoSpan = document.createElement('span');
+          infoSpan.innerHTML = `${item.dimension} cm × ${originalQty}本 ${changeText} ${totalText}`;
+          
+          leftDiv.appendChild(completeBtn);
+          leftDiv.appendChild(infoSpan);
+          
+          const actionDiv = document.createElement('div');
+          actionDiv.className = 'action-buttons';
+          
+          const minusBtn = document.createElement('button');
+          minusBtn.className = 'btn-small';
+          minusBtn.textContent = '−';
+          minusBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            item.quantity = Math.max(1, (item.quantity || 1) - 1);
+            if(!item.originalQuantity) item.originalQuantity = item.quantity + 1;
+            item.change = item.quantity - (item.originalQuantity || item.quantity);
+            save();
+            updateView();
+          });
+          
+          const plusBtn = document.createElement('button');
+          plusBtn.className = 'btn-small';
+          plusBtn.textContent = '＋';
+          plusBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            item.quantity = (item.quantity || 1) + 1;
+            if(!item.originalQuantity) item.originalQuantity = item.quantity - 1;
+            item.change = item.quantity - (item.originalQuantity || item.quantity);
+            save();
+            updateView();
+          });
+          
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'btn-small btn-danger';
+          deleteBtn.textContent = '削除';
+          deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showDeleteItemConfirm(item.id);
+          });
+          
+          actionDiv.appendChild(minusBtn);
+          actionDiv.appendChild(plusBtn);
+          actionDiv.appendChild(deleteBtn);
+          
+          detailDiv.appendChild(leftDiv);
+          detailDiv.appendChild(actionDiv);
+          itemDiv.appendChild(detailDiv);
+          
+          if(item.memo) {
+            const memoDiv = document.createElement('div');
+            memoDiv.className = 'memo';
+            memoDiv.textContent = `📝 ${item.memo}`;
+            itemDiv.appendChild(memoDiv);
+          }
+          
+          itemDiv.addEventListener('click', () => {
+            currentEditId = item.id;
+            document.getElementById('modal-memo').value = item.memo || '';
+            const modal = document.getElementById('memo-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('show');
+          });
+          
+          prodDiv.appendChild(itemDiv);
+        });
+        
+        locDiv.appendChild(prodDiv);
+      });
+      
+      contentDiv.appendChild(locDiv);
+    });
+    
+    groupDiv.appendChild(contentDiv);
+    container.appendChild(groupDiv);
+  });
+  
+  if(Object.keys(grouped).length === 0) {
+    container.innerHTML = '<p>データがありません</p>';
+  }
+};
+
+// メモモーダル
+document.getElementById('memo-modal').addEventListener('click', (e) => {
+  if(e.target.id === 'memo-modal') {
+    const modal = document.getElementById('memo-modal');
+    modal.classList.remove('show');
+    modal.classList.add('hidden');
+    currentEditId = null;
+  }
+});
+
+document.getElementById('save-memo-btn').addEventListener('click', () => {
+  if(currentEditId) {
+    const item = data.dimensions.find(d => d.id === currentEditId);
+    if(item) {
+      item.memo = document.getElementById('modal-memo').value.trim();
+      save();
+      updateView();
+    }
+  }
+  const modal = document.getElementById('memo-modal');
+  modal.classList.remove('show');
+  modal.classList.add('hidden');
+  currentEditId = null;
+});
+
+document.getElementById('cancel-memo-btn').addEventListener('click', () => {
+  const modal = document.getElementById('memo-modal');
+  modal.classList.remove('show');
+  modal.classList.add('hidden');
+  currentEditId = null;
+});
+
+// 削除確認モーダル
+const showDeleteItemConfirm = (itemId) => {
+  currentDeleteItem = itemId;
+  const item = data.dimensions.find(d => d.id === itemId);
+  if(item) {
+    document.getElementById('delete-confirm-message').textContent = `${item.dimension}cm × ${item.quantity}本 を削除しますか？`;
+    const modal = document.getElementById('delete-confirm-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('show');
+  }
+};
+
+const closeDeleteConfirm = () => {
+  const modal = document.getElementById('delete-confirm-modal');
+  modal.classList.remove('show');
+  modal.classList.add('hidden');
+  currentDeleteItem = null;
+};
+
+document.getElementById('delete-confirm-btn').addEventListener('click', () => {
+  if(currentDeleteItem) {
+    const item = data.dimensions.find(d => d.id === currentDeleteItem);
+    if(item) {
+      data.trash.push({
+        type: '寸法',
+        room: item.room,
+        product: item.product,
+        location: item.location,
+        dimension: item.dimension,
+        quantity: item.quantity,
+        deletedAt: new Date().toLocaleString()
+      });
+    }
+    data.dimensions = data.dimensions.filter(d => d.id !== currentDeleteItem);
+    save();
+    updateView();
+    closeDeleteConfirm();
+  }
+});
+
+document.getElementById('delete-cancel-btn').addEventListener('click', () => {
+  closeDeleteConfirm();
+});
+
+document.getElementById('delete-confirm-modal').addEventListener('click', (e) => {
+  if(e.target.id === 'delete-confirm-modal') {
+    closeDeleteConfirm();
+  }
+});
+
+// ゴミ箱
+const showTrash = () => {
+  const list = document.getElementById('trash-list');
+  if(data.trash.length === 0) {
+    list.innerHTML = '<div class="trash-empty">ゴミ箱は空です</div>';
+  } else {
+    list.innerHTML = '';
+    data.trash.slice().reverse().forEach((item, index) => {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'trash-item';
+      
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'trash-item-info';
+      
+      if(item.type === '部屋') {
+        infoDiv.innerHTML = `
+          <strong>部屋:</strong> ${item.name}<br>
+          <small>${item.deletedAt}</small>
+        `;
+      } else {
+        infoDiv.innerHTML = `
+          <strong>寸法:</strong> ${item.room} - ${item.product}<br>
+          ${item.location} - ${item.dimension}cm × ${item.quantity}本<br>
+          <small>${item.deletedAt}</small>
+        `;
+      }
+      
+      const restoreBtn = document.createElement('button');
+      restoreBtn.className = 'restore-btn';
+      restoreBtn.textContent = '復元';
+      restoreBtn.onclick = () => restoreItem(data.trash.length - 1 - index);
+      
+      itemDiv.appendChild(infoDiv);
+      itemDiv.appendChild(restoreBtn);
+      list.appendChild(itemDiv);
+    });
+  }
+  const modal = document.getElementById('trash-modal');
+  modal.classList.remove('hidden');
+  modal.classList.add('show');
+};
+
+// アイテムの復元
+const restoreItem = (trashIndex) => {
+  const item = data.trash[trashIndex];
+  if(!item) return;
+  
+  if(item.type === '部屋') {
+    // 部屋の復元
+    if(!data.rooms.includes(item.name)) {
+      data.rooms.push(item.name);
+    }
+  } else {
+    // 寸法の復元
+    const newId = Date.now();
+    data.dimensions.push({
+      id: newId,
+      room: item.room,
+      product: item.product,
+      location: item.location,
+      dimension: item.dimension,
+      quantity: item.quantity,
+      originalQuantity: item.quantity,
+      change: 0,
+      completed: false,
+      memo: item.memo || ''
+    });
+  }
+  
+  // ゴミ箱から削除
+  data.trash.splice(trashIndex, 1);
+  save();
+  
+  // 画面更新
+  updateRoomList();
+  updateRoomSelect();
+  updateViewRoomSelect();
+  showTrash(); // ゴミ箱を再表示
+  
+  // 復元成功メッセージ
+  alert(`復元しました: ${item.type === '部屋' ? item.name : `${item.room} - ${item.product}`}`);
+};
+
+document.getElementById('trash-btn').addEventListener('click', showTrash);
+
+document.getElementById('close-trash-btn').addEventListener('click', () => {
+  const modal = document.getElementById('trash-modal');
+  modal.classList.remove('show');
+  modal.classList.add('hidden');
+});
+
+document.getElementById('trash-modal').addEventListener('click', (e) => {
+  if(e.target.id === 'trash-modal') {
+    const modal = document.getElementById('trash-modal');
+    modal.classList.remove('show');
+    modal.classList.add('hidden');
+  }
+});
+
+document.getElementById('view-room-select').addEventListener('change', updateView);
+
+// Service Worker登録
+if('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('data:text/javascript,' + encodeURIComponent(`
+    self.addEventListener('install', e => self.skipWaiting());
+    self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
+  `));
+}
+
+// 初期化
+updateRoomList();
+updateProductHistory();
+window.addEventListener('DOMContentLoaded', () => {
+  const modal = document.getElementById('memo-modal');
+  if(modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('show');
+  }
+});
+</script>
+</body>
+</html>
